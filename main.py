@@ -5,7 +5,9 @@ from numba import njit
 import sys, requests
 from quiz import Question, QuizBrain, QuizInterface
 from random import shuffle
+from buttons import Buttons
 import html, math
+import pygame_menu
 
 
 
@@ -15,7 +17,7 @@ pg.init()
 pg.font.init()
 total_time = pg.time.get_ticks()
 
-
+bg = pg.image.load('star_bg.png')
 
 parameters = {
 "amount" : 10,
@@ -50,17 +52,16 @@ def quiz_make():
         quiz.next_question()
     global score
     score = quiz.score
+    main(screen)
     
 screen = pg.display.set_mode((800,600))
 
 def main(screen):
-
-
     running = True
     clock = pg.time.Clock()
     #increasing causes lower fps but better graphics, but decreasing does opposite.
-    hres = 120 #horizontal res
-    halfvres = 100 #half of the vertical res
+    hres = 60 #horizontal res
+    halfvres = 50 #half of the vertical res
 
     mod = hres / 60 # scale factor between 60 degree fov and hres.
     size = 25
@@ -76,8 +77,8 @@ def main(screen):
 
     while running:
         
-        ticks = pg.time.get_ticks()/200
-        seconds = math.trunc((60000-(pg.time.get_ticks() - total_time))/1000) + 10*score
+        ticks = pg.time.get_ticks()
+        seconds = math.trunc((60000-(ticks - total_time))/1000) + 10*score
         if seconds <= 0:
             running = False
 
@@ -285,9 +286,18 @@ def gen_map(size):
 #     spsize = np.asarray(sprite.get_size())*hres/800
 
 #     return sprites, spsize
+font = pg.font.SysFont('Arial',100,False)
+font2 = pg.font.SysFont('Arial',75,False)
 
-quiz_make()
-main(screen)
+menu = pygame_menu.Menu("Danyal's Dead maze", 600, 400, theme=pygame_menu.themes.THEME_SOLARIZED )
+
+menu.add.button('Play',quiz_make)
+menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.mainloop(screen)
+      
+
+
+
 
 #this is a test.
 
