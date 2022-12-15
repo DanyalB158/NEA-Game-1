@@ -1,33 +1,35 @@
-from tkinter import Tk, Canvas, StringVar, Label, Radiobutton, Button, messagebox
+
 import pygame as pg
 import numpy as np
 from numba import njit
 import sys, requests
 from quiz import Question, QuizBrain, QuizInterface
+import random
 from random import shuffle
-from buttons import Buttons
 import html, math
 import pygame_menu
 
 
 
-#url_list = ["https://opentdb.com/api.php?amount=10&type=multiple", "https://opentdb.com/api.php?amount=10&category=21","https://opentdb.com/api.php?amount=10&category=9&difficulty=hard"]
-
+url_list = ["https://opentdb.com/api.php?amount=10&type=multiple", "https://opentdb.com/api.php?amount=10&category=21","https://opentdb.com/api.php?amount=10&category=9&difficulty=hard"]
 pg.init()
 pg.font.init()
+running = False
+if running == False:
+  url_num = random.randint(0,len(url_list)-1)
 total_time = pg.time.get_ticks()
 
-bg = pg.image.load('star_bg.png')
+
 
 parameters = {
 "amount" : 10,
 "type" : "multiple"
 }
 
-response = requests.get(url="https://opentdb.com/api.php?amount=10&category=9&difficulty=hard" , params = parameters)
+response = requests.get(url=url_list[url_num] , params = parameters)
 question_data = response.json()['results']
 
-def quiz_make():
+def quiz_make(timer):
     question_bank = []
     for question in question_data:
         choices = []
@@ -52,11 +54,11 @@ def quiz_make():
         quiz.next_question()
     global score
     score = quiz.score
-    main(screen)
+    main(screen,timer)
     
 screen = pg.display.set_mode((800,600))
 
-def main(screen):
+def main(screen,timer):
     running = True
     clock = pg.time.Clock()
     #increasing causes lower fps but better graphics, but decreasing does opposite.
@@ -81,6 +83,7 @@ def main(screen):
         seconds = math.trunc((60000-(ticks - total_time))/1000) + 10*score
         if seconds <= 0:
             running = False
+            
 
         if int(posx) == exitx and int(posy) == exity:
             running = False
@@ -286,16 +289,18 @@ def gen_map(size):
 #     spsize = np.asarray(sprite.get_size())*hres/800
 
 #     return sprites, spsize
-font = pg.font.SysFont('Arial',100,False)
-font2 = pg.font.SysFont('Arial',75,False)
-
-menu = pygame_menu.Menu("Danyal's Dead maze", 600, 400, theme=pygame_menu.themes.THEME_SOLARIZED )
-
-menu.add.button('Play',quiz_make)
+easy_timer = 60000
+easy_mode =  quiz_make(60000)
+medium_mode = quiz_make(80000)
+hard_mode = quiz_make(100000)
+menu = pygame_menu.Menu("MAZE", 600, 400, theme=pygame_menu.themes.THEME_SOLARIZED)
 menu.add.button('Quit', pygame_menu.events.EXIT)
-menu.mainloop(screen)
-      
+menu.add.button('Easy', easy_mode)
+menu.add.button('Medium', medium_mode)
+menu.add.button('Hard', hard_mode)
 
+menu.mainloop(screen)
+#need to run 
 
 
 
